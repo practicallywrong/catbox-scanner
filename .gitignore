@@ -1,3 +1,4 @@
 /.venv
 /go.sum
 /valid_links.db
+/catbox-scanner
