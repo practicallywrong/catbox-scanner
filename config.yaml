@@ -1,0 +1,25 @@
+database:
+  filepath: "valid_links.db"
+scanner:
+  num_workers: 6000
+  request_timeout: 5s
+  exts:
+    - ".mp4"
+    # - ".mkv"
+    # - ".webm"
+
+    - ".png"
+    - ".jpg"
+    # - ".gif"
+
+    # - ".zip"
+    # - ".rar"
+    # - ".7z"
+
+    # - ".pdf"
+    # - ".csv"
+    # - ".xlsx"
+
+server:
+  server_enabled: false
+  server_url: "http://localhost:6969"
