@@ -1,7 +1,7 @@
 database:
   filepath: "valid_links.db"
 scanner:
-  num_workers: 6000
+  num_workers: 1000
   request_timeout: 5s
   exts:
     - ".mp4"
@@ -12,11 +12,11 @@ scanner:
     - ".jpg"
     # - ".gif"
 
-    # - ".zip"
+    - ".zip"
     # - ".rar"
     # - ".7z"
 
-    # - ".pdf"
+    - ".pdf"
     # - ".csv"
     # - ".xlsx"
 

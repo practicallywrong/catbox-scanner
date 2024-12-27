@@ -2,9 +2,11 @@ package scanner
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 
 	"catbox-scanner/internals/config"
@@ -13,6 +15,7 @@ import (
 	"catbox-scanner/internals/utils"
 
 	"github.com/panjf2000/ants/v2"
+	"github.com/rs/dnscache"
 )
 
 const charset = "abcdefghijklmnopqrstuvwxyz0123456789"
@@ -39,6 +42,7 @@ func NewScanner(cfg *config.Config, metrics *metrics.Metrics, db *database.Datab
 		notifyCh = make(chan *NotifyRequest, 1000)
 	}
 
+	r := &dnscache.Resolver{}
 	client := &http.Client{
 		Timeout: cfg.Scanner.RequestTimeout,
 		Transport: &http.Transport{
@@ -46,6 +50,25 @@ func NewScanner(cfg *config.Config, metrics *metrics.Metrics, db *database.Datab
 			MaxIdleConnsPerHost: 0,
 			MaxConnsPerHost:     0,
 			ForceAttemptHTTP2:   true,
+			//Dns caching
+			DialContext: func(ctx context.Context, network string, addr string) (conn net.Conn, err error) {
+				host, port, err := net.SplitHostPort(addr)
+				if err != nil {
+					return nil, err
+				}
+				ips, err := r.LookupHost(ctx, host)
+				if err != nil {
+					return nil, err
+				}
+				for _, ip := range ips {
+					var dialer net.Dialer
+					conn, err = dialer.DialContext(ctx, network, net.JoinHostPort(ip, port))
+					if err == nil {
+						break
+					}
+				}
+				return
+			},
 		},
 	}
 
