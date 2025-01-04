@@ -22,7 +22,7 @@ func main() {
 		return
 	}
 
-	metrics := metrics.NewMetrics(60)
+	metricss := metrics.NewMetrics(60)
 	isRunning := true
 
 	db, err := database.NewDatabase(cfg.Database.Filepath)
@@ -39,9 +39,10 @@ func main() {
 		ants.WithPreAlloc(true),
 	)
 
-	scannerService := scanner.NewScanner(cfg, metrics, db, pool, &isRunning)
+	scannerService := scanner.NewScanner(cfg, metricss, db, pool, &isRunning)
 
-	go metrics.StartPrintLoop()
+	go metricss.StartPrintLoop()
+	go metrics.StartPrometheusServer()
 	go scannerService.StartScanning()
 
 	signalChan := make(chan os.Signal, 1)
