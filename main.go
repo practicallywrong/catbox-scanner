@@ -51,4 +51,5 @@ func main() {
 	isRunning = false
 	pool.ReleaseTimeout(time.Second)
 	db.Close()
+	fmt.Println("Bye Bye~")
 }
