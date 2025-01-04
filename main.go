@@ -42,7 +42,6 @@ func main() {
 	scannerService := scanner.NewScanner(cfg, metricss, db, pool, &isRunning)
 
 	go metricss.StartPrintLoop()
-	go metrics.StartPrometheusServer()
 	go scannerService.StartScanning()
 
 	signalChan := make(chan os.Signal, 1)
@@ -52,5 +51,5 @@ func main() {
 	isRunning = false
 	pool.ReleaseTimeout(time.Second)
 	db.Close()
-	fmt.Println("Bye Bye~")
+	fmt.Println("\nBye Bye~")
 }
