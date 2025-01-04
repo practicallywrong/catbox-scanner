@@ -41,7 +41,7 @@ func main() {
 
 	scannerService := scanner.NewScanner(cfg, metricss, db, pool, &isRunning)
 
-	go metricss.StartPrintLoop()
+	go metricss.StartPrintLoop(&isRunning)
 	go scannerService.StartScanning()
 
 	signalChan := make(chan os.Signal, 1)

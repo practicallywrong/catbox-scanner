@@ -51,14 +51,14 @@ func (m *Metrics) calculateAverageRPS() int {
 	return averageRPS
 }
 
-func (m *Metrics) StartPrintLoop() {
+func (m *Metrics) StartPrintLoop(isRunning *bool) {
 	var lastRequestsSent, linksFoundLastMin int
 	secTicker := time.NewTicker(1 * time.Second)
 	minTicker := time.NewTicker(1 * time.Minute)
 	defer secTicker.Stop()
 	defer minTicker.Stop()
 
-	for {
+	for *isRunning {
 		select {
 		case <-secTicker.C:
 			rps := m.RequestsSent - lastRequestsSent
