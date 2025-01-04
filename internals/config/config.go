@@ -10,7 +10,7 @@ import (
 
 type Config struct {
 	Database struct {
-		Filepath string `yaml:"filepath"`
+		ConnectionString string `yaml:"connection_string"`
 	} `yaml:"database"`
 
 	Scanner struct {
