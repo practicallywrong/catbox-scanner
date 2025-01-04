@@ -13,7 +13,7 @@ type Database struct {
 
 func NewDatabase(filepath string) (*Database, error) {
 	db, err := sql.Open("sqlite3", filepath+"?cache=shared")
-	db.SetMaxOpenConns(2)
+	db.SetMaxOpenConns(1)
 	if err != nil {
 		return nil, err
 	}
