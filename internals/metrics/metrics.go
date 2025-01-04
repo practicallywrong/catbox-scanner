@@ -2,8 +2,12 @@ package metrics
 
 import (
 	"fmt"
+	"net/http"
 	"sync"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type Metrics struct {
@@ -14,12 +18,41 @@ type Metrics struct {
 	FoundPerMin    int
 	RPSHistory     []int
 	MaxHistorySize int
+
+	requestsSentCounter prometheus.Counter
+	linksFoundCounter   prometheus.Counter
 }
 
 func NewMetrics(maxHistorySize int) *Metrics {
+	// Define Prometheus metrics
+	requestsSentCounter := prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "requests_sent_total",
+		Help: "Total number of requests sent",
+	})
+	linksFoundCounter := prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "links_found_total",
+		Help: "Total number of links found",
+	})
+	reqPerSecGauge := prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "requests_per_second",
+		Help: "Requests per second",
+	})
+	foundPerMinGauge := prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "found_per_minute",
+		Help: "Links found per minute",
+	})
+
+	// Register metrics
+	prometheus.MustRegister(requestsSentCounter)
+	prometheus.MustRegister(linksFoundCounter)
+	prometheus.MustRegister(reqPerSecGauge)
+	prometheus.MustRegister(foundPerMinGauge)
+
 	return &Metrics{
-		RPSHistory:     make([]int, 0, maxHistorySize),
-		MaxHistorySize: maxHistorySize,
+		RPSHistory:          make([]int, 0, maxHistorySize),
+		MaxHistorySize:      maxHistorySize,
+		requestsSentCounter: requestsSentCounter,
+		linksFoundCounter:   linksFoundCounter,
 	}
 }
 
@@ -27,12 +60,14 @@ func (m *Metrics) IncrementRequestsSent() {
 	m.Lock()
 	m.RequestsSent++
 	m.Unlock()
+	m.requestsSentCounter.Inc()
 }
 
 func (m *Metrics) IncrementLinksFound() {
 	m.Lock()
 	m.LinksFound++
 	m.Unlock()
+	m.linksFoundCounter.Inc()
 }
 
 func (m *Metrics) calculateAverageRPS() int {
@@ -48,6 +83,7 @@ func (m *Metrics) calculateAverageRPS() int {
 		totalRPS += rps
 	}
 	averageRPS := totalRPS / len(m.RPSHistory)
+
 	return averageRPS
 }
 
@@ -61,6 +97,7 @@ func (m *Metrics) StartPrintLoop() {
 	for {
 		select {
 		case <-secTicker.C:
+			// Calculate RPS
 			rps := m.RequestsSent - lastRequestsSent
 			lastRequestsSent = m.RequestsSent
 			m.ReqPerSec = rps
@@ -84,4 +121,9 @@ func (m *Metrics) StartPrintLoop() {
 			fmt.Println("")
 		}
 	}
+}
+
+func StartPrometheusServer() {
+	http.Handle("/metrics", promhttp.Handler())
+	go http.ListenAndServe(":9090", nil) // Expose the metrics on port 9090
 }
