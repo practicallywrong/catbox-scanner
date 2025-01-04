@@ -19,9 +19,6 @@ func NewDatabase(connStr string) (*Database, error) {
 		return nil, err
 	}
 
-	// Set max connections if needed
-	db.SetMaxOpenConns(1)
-
 	// Ensure the valid_ids table exists
 	_, err = db.Exec(`
 		CREATE TABLE IF NOT EXISTS valid_ids (
