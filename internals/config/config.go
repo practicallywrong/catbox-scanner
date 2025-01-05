@@ -18,11 +18,6 @@ type Config struct {
 		RequestTimeout time.Duration `yaml:"request_timeout"`
 		Exts           []string      `yaml:"exts"`
 	} `yaml:"scanner"`
-
-	Server struct {
-		ServerEnabled bool   `yaml:"server_enabled"`
-		ServerURL     string `yaml:"server_url"`
-	} `yaml:"server"`
 }
 
 func LoadConfig(filepath string) (*Config, error) {

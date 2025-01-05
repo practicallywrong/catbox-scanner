@@ -20,7 +20,3 @@ scanner:
     - "pdf"
     # - "csv"
     # - "xlsx"
-
-server:
-  server_enabled: false
-  server_url: "http://localhost:6969"
