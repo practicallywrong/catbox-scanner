@@ -1,25 +1,25 @@
 database:
-  connection_string: "host=localhost user=catbox dbname=catbox-scanner-db sslmode=disable"
+  connection_string: "host=localhost user=catbox password=dbpassword dbname=catbox-scanner-db sslmode=disable"
 
 scanner:
   num_workers: 1000
   request_timeout: 5s
   exts:
-    - ".mp4"
-    # - ".mkv"
-    # - ".webm"
+    - "mp4"
+    # - "mkv"
+    # - "webm"
 
-    - ".png"
-    - ".jpg"
-    # - ".gif"
+    - "png"
+    - "jpg"
+    # - "gif"
 
-    - ".zip"
-    # - ".rar"
-    # - ".7z"
+    - "zip"
+    # - "rar"
+    # - "7z"
 
-    - ".pdf"
-    # - ".csv"
-    # - ".xlsx"
+    - "pdf"
+    # - "csv"
+    # - "xlsx"
 
 server:
   server_enabled: false

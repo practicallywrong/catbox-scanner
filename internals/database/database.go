@@ -2,7 +2,6 @@ package database
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 
 	_ "github.com/lib/pq"
@@ -13,18 +12,16 @@ type Database struct {
 }
 
 func NewDatabase(connStr string) (*Database, error) {
-	// Open PostgreSQL connection
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		return nil, err
 	}
 
-	// Ensure the valid_ids table exists
 	_, err = db.Exec(`
-		CREATE TABLE IF NOT EXISTS valid_ids (
-			id TEXT PRIMARY KEY,
-			url TEXT,
-			ext TEXT
+		CREATE TABLE IF NOT EXISTS found_ids (
+			row_number SERIAL PRIMARY KEY,
+			id CHAR(6) NOT NULL UNIQUE,
+			ext VARCHAR(10) NOT NULL
 		)
 	`)
 	if err != nil {
@@ -35,10 +32,7 @@ func NewDatabase(connStr string) (*Database, error) {
 }
 
 func (db *Database) SaveValidLink(id, ext string) error {
-	url := fmt.Sprintf("https://files.catbox.moe/%s%s", id, ext)
-
-	// PostgreSQL INSERT statement
-	_, err := db.conn.Exec("INSERT INTO valid_ids (id, url, ext) VALUES ($1, $2, $3) ON CONFLICT (id) DO NOTHING", id, url, ext)
+	_, err := db.conn.Exec("INSERT INTO found_ids (id, ext) VALUES ($1, $2)", id, ext)
 	return err
 }
 
