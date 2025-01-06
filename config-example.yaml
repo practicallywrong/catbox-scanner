@@ -1,6 +1,5 @@
 database:
-  dialect: "sqlite"
-  connection_string: "file:catbox.db?cache=shared&_fk=1"
+  connection_string: "file:catbox.db"
 
 scanner:
   num_workers: 1000

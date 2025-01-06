@@ -25,7 +25,7 @@ func main() {
 	metricss := metrics.NewMetrics(60)
 	isRunning := true
 
-	db, err := database.NewDatabase(cfg.Database.Dialect, cfg.Database.ConnectionString)
+	db, err := database.NewDatabase(cfg.Database.ConnectionString)
 	if err != nil {
 		fmt.Printf("Failed to initialize database: %v\n", err)
 		return
