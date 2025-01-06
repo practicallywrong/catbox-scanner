@@ -10,6 +10,7 @@ import (
 
 type Config struct {
 	Database struct {
+		Dialect          string `yaml:"dialect"`
 		ConnectionString string `yaml:"connection_string"`
 	} `yaml:"database"`
 
