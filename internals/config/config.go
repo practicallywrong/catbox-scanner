@@ -13,6 +13,12 @@ type Config struct {
 		ConnectionString string `yaml:"connection_string"`
 	} `yaml:"database"`
 
+	MasterServer struct {
+		Enabled  bool   `yaml:"enabled"`
+		Endpoint string `yaml:"endpoint"`
+		AuthKey  string `yaml:"auth_key"`
+	} `yaml:"master_server"`
+
 	Scanner struct {
 		NumWorkers     int           `yaml:"num_workers"`
 		RequestTimeout time.Duration `yaml:"request_timeout"`

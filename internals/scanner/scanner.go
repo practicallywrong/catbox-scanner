@@ -19,12 +19,13 @@ const charset = "abcdefghijklmnopqrstuvwxyz0123456789"
 const id_len = 6
 
 type Scanner struct {
-	metrics   *metrics.Metrics
-	db        *database.Database
-	pool      *ants.Pool
-	isRunning *bool
-	config    *config.Config
-	client    *http.Client
+	metrics            *metrics.Metrics
+	db                 *database.Database
+	pool               *ants.Pool
+	isRunning          *bool
+	config             *config.Config
+	client             *http.Client
+	masterServerClient *MasterServerClient
 }
 
 func NewScanner(cfg *config.Config, metrics *metrics.Metrics, db *database.Database, pool *ants.Pool, isRunning *bool) *Scanner {
@@ -36,7 +37,6 @@ func NewScanner(cfg *config.Config, metrics *metrics.Metrics, db *database.Datab
 			MaxIdleConnsPerHost: 0,
 			MaxConnsPerHost:     0,
 			ForceAttemptHTTP2:   true,
-			//Dns caching
 			DialContext: func(ctx context.Context, network string, addr string) (conn net.Conn, err error) {
 				host, port, err := net.SplitHostPort(addr)
 				if err != nil {
@@ -58,13 +58,19 @@ func NewScanner(cfg *config.Config, metrics *metrics.Metrics, db *database.Datab
 		},
 	}
 
+	var masterServerClient *MasterServerClient
+	if cfg.MasterServer.Enabled {
+		masterServerClient, _ = NewMasterServerClient(cfg, metrics)
+	}
+
 	return &Scanner{
-		metrics:   metrics,
-		db:        db,
-		pool:      pool,
-		isRunning: isRunning,
-		config:    cfg,
-		client:    client,
+		metrics:            metrics,
+		db:                 db,
+		pool:               pool,
+		isRunning:          isRunning,
+		config:             cfg,
+		client:             client,
+		masterServerClient: masterServerClient,
 	}
 }
 
@@ -78,6 +84,11 @@ func (s *Scanner) scanWorker(id string) {
 		if exists {
 			s.db.SaveValidLink(id, ext)
 			s.metrics.IncrementLinksFound()
+
+			if s.masterServerClient != nil {
+				entry := fmt.Sprintf("%s.%s", id, ext)
+				s.masterServerClient.AddEntry(entry)
+			}
 		}
 	}
 }
@@ -90,7 +101,6 @@ func (s *Scanner) StartScanning() {
 		})
 
 		if err != nil {
-			// pool is closed
 			break
 		}
 	}
