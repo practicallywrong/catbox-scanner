@@ -31,7 +31,6 @@ func NewMasterServerClient(cfg *config.Config, metrics *metrics.Metrics) (*Maste
 	client := &http.Client{
 		Timeout: cfg.Scanner.RequestTimeout,
 		Transport: &http.Transport{
-			DisableKeepAlives:   false,
 			MaxIdleConnsPerHost: 0,
 			MaxConnsPerHost:     0,
 			ForceAttemptHTTP2:   true,
@@ -94,7 +93,6 @@ func (msc *MasterServerClient) sendEntryToMaster(entry string) {
 
 	resp, err := msc.client.Post(url, "application/json", bytes.NewBuffer(data))
 	if err != nil {
-		fmt.Printf("Error sending entry to master server: %v\n", err)
 		msc.config.MasterServer.Enabled = false
 		return
 	}
@@ -102,5 +100,6 @@ func (msc *MasterServerClient) sendEntryToMaster(entry string) {
 
 	if resp.StatusCode != http.StatusOK {
 		fmt.Printf("Master server responded with status code: %d\n", resp.StatusCode)
+		msc.config.MasterServer.Enabled = false
 	}
 }
