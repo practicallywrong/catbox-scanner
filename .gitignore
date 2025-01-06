@@ -1,5 +1,5 @@
 /.venv
 /go.sum
-/valid_links.db
+/catbox-found-ids.sqlite
 /catbox-scanner
 /config.yaml

@@ -1,5 +1,5 @@
 database:
-  connection_string: "file:catbox.db"
+  connection_string: "file:catbox-found-ids.sqlite"
 
 scanner:
   num_workers: 1000
