@@ -16,7 +16,7 @@ type MasterServerClient struct {
 	client     *http.Client
 	mu         sync.Mutex
 	entryQueue []string
-	serverAddr string
+	endpoint   string
 	enabled    bool
 	metrics    *metrics.Metrics
 }
@@ -38,11 +38,11 @@ func NewMasterServerClient(cfg *config.Config, metrics *metrics.Metrics) (*Maste
 	}
 
 	masterClient := &MasterServerClient{
-		config:     cfg,
-		client:     client,
-		serverAddr: serverAddr,
-		enabled:    cfg.MasterServer.Enabled,
-		metrics:    metrics,
+		config:   cfg,
+		client:   client,
+		endpoint: serverAddr,
+		enabled:  cfg.MasterServer.Enabled,
+		metrics:  metrics,
 	}
 
 	go masterClient.startSendingEntries()
@@ -74,8 +74,17 @@ func (msc *MasterServerClient) sendEntryToMaster(entry string) {
 		return
 	}
 
-	url := fmt.Sprintf("%s/entries", msc.serverAddr)
-	payload := map[string]string{"entry": entry}
+	// Split entry into id and extension
+	var id, ext string
+	fmt.Sscanf(entry, "%[^.].%s", &id, &ext)
+	if id == "" || ext == "" {
+		fmt.Printf("Invalid entry format: %s\n", entry)
+		return
+	}
+
+	url := fmt.Sprintf("%s/add?auth=%s", msc.endpoint, msc.config.MasterServer.AuthKey)
+
+	payload := map[string]string{"id": id, "ext": ext}
 	data, err := json.Marshal(payload)
 	if err != nil {
 		fmt.Printf("Error marshalling entry: %v\n", err)
@@ -89,4 +98,8 @@ func (msc *MasterServerClient) sendEntryToMaster(entry string) {
 		return
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("Master server responded with status code: %d\n", resp.StatusCode)
+	}
 }
