@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"sync"
 
 	"catbox-scanner/internals/config"
@@ -74,13 +75,13 @@ func (msc *MasterServerClient) sendEntryToMaster(entry string) {
 		return
 	}
 
-	// Split entry into id and extension
-	var id, ext string
-	fmt.Sscanf(entry, "%[^.].%s", &id, &ext)
-	if id == "" || ext == "" {
+	parts := strings.SplitN(entry, ".", 2)
+	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
 		fmt.Printf("Invalid entry format: %s\n", entry)
 		return
 	}
+
+	id, ext := parts[0], parts[1]
 
 	url := fmt.Sprintf("%s/add?auth=%s", msc.endpoint, msc.config.MasterServer.AuthKey)
 
