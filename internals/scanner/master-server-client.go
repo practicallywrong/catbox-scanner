@@ -2,8 +2,10 @@ package scanner
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"net"
 	"net/http"
 	"sync"
 
@@ -30,7 +32,12 @@ func NewMasterServerClient(cfg *config.Config, metrics *metrics.Metrics) (*Maste
 
 	serverAddr := cfg.MasterServer.Endpoint
 	client := &http.Client{
-		Transport: &http2.Transport{},
+		Transport: &http2.Transport{
+			AllowHTTP: true,
+			DialTLS: func(network, addr string, cfg *tls.Config) (net.Conn, error) {
+				return net.Dial(network, addr)
+			},
+		},
 	}
 
 	masterClient := &MasterServerClient{
