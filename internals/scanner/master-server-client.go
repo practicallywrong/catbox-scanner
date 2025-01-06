@@ -83,7 +83,7 @@ func (msc *MasterServerClient) sendEntryToMaster(entry string) {
 
 	id, ext := parts[0], parts[1]
 
-	url := fmt.Sprintf("%s/add?auth=%s", msc.endpoint, msc.config.MasterServer.AuthKey)
+	url := fmt.Sprintf("%s?auth=%s", msc.endpoint, msc.config.MasterServer.AuthKey)
 
 	payload := map[string]string{"id": id, "ext": ext}
 	data, err := json.Marshal(payload)
